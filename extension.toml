@@ -1,6 +1,6 @@
 id = "mojo"
 name = "Mojo"
-description = "Modern Mojo language support with v25.6+ syntax"
+description = "Modern Mojo language support with v0.25.6+ syntax"
 version = "0.1.0"
 schema_version = 1
 authors = ["nijaru"]

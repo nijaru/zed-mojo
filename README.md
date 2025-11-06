@@ -11,9 +11,9 @@ Language support for [Mojo](https://docs.modular.com/mojo) in the Zed editor.
 
 ## Requirements
 
-- [Mojo](https://docs.modular.com/mojo/manual/get-started/) installed with `mojo-lsp-server`
+- [Mojo](https://docs.modular.com/mojo/manual/get-started/) v0.25.6 or later
 
-The extension searches for `mojo-lsp-server` in standard installation locations and your PATH.
+The `mojo-lsp-server` is bundled with Mojo installations (v0.25.6+). The extension automatically searches for it in standard installation locations and your PATH.
 
 ## Installation
 
