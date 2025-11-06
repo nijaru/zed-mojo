@@ -6,9 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a comprehensive **Zed editor extension for the Mojo programming language** that includes:
 - **Tree-sitter grammar** for syntax parsing and highlighting
-- **Rust-based LSP integration** with the Magic platform  
+- **Rust-based LSP integration** with the Magic platform
 - **Language configuration** for Zed editor integration
-- **Modern Mojo v25.4+ syntax support** exclusively
+- **Modern Mojo v0.25.6+ syntax support** exclusively
 
 The project follows the **single repository approach** - all components (extension + grammar) are in one repo for simplified development. The grammar can be extracted to a separate repo later if needed.
 
@@ -43,6 +43,21 @@ cargo build --release
 tree-sitter generate && npm install && cargo build --release
 ```
 
+### Mojo Installation (for testing)
+```bash
+# Option 1: Install via pip
+pip install mojo
+
+# Option 2: Install via Pixi (recommended for development)
+pixi add mojo
+
+# Option 3: Install via Magic CLI (full platform)
+curl -ssL https://magic.modular.com/install | bash
+
+# Verify installation
+mojo --version
+```
+
 ### Testing in Zed
 ```bash
 # Install as development extension in Zed
@@ -67,7 +82,7 @@ cp -r . ~/.config/zed/extensions/mojo/
 ### Grammar Strategy
 - **Clean Mojo-first approach** - Not based on Python grammar
 - **Simplified implementation** - Focus on core features that work reliably
-- **Modern syntax target** - Mojo v25.4+ exclusively, no legacy support
+- **Modern syntax target** - Mojo v0.25.6+ exclusively, no legacy support
 - **Conflict management** - Minimal conflicts for better parser performance
 
 ### Key Mojo Language Features Implemented
@@ -137,7 +152,7 @@ cp -r . ~/.config/zed/extensions/mojo/
   - Standard library patterns in `external/modular/mojo/stdlib/`
   - Documentation in `external/modular/mojo/docs/`
 
-### Key Modern Mojo Patterns (v25.4+)
+### Key Modern Mojo Patterns (v0.25.6+)
 ```mojo
 # Modern argument conventions
 fn process(mut self, out result: Int, owned data: String, ref config: Config):
@@ -161,7 +176,7 @@ var tmp = value^
 ### Grammar Philosophy
 - **Start simple** - Get basic features working before adding complexity
 - **Mojo-first** - Design for Mojo syntax, not Python compatibility
-- **Modern focus** - Target v25.4+ syntax exclusively
+- **Modern focus** - Target v0.25.6+ syntax exclusively
 - **Pragmatic approach** - Working simple grammar > broken complex grammar
 
 ### Code Quality

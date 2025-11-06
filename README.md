@@ -1,11 +1,11 @@
 # Zed Mojo Extension
 
-A modern [Zed](https://zed.dev) editor extension providing comprehensive support for the [Mojo](https://docs.modular.com/mojo) programming language (v25.4+).
+A modern [Zed](https://zed.dev) editor extension providing comprehensive support for the [Mojo](https://docs.modular.com/mojo) programming language (v0.25.6+).
 
 ## Features
 
 ### 🎨 **Syntax Highlighting**
-- Modern Mojo v25.4+ keywords and syntax
+- Modern Mojo v0.25.6+ keywords and syntax
 - Argument conventions: `mut`, `owned`, `ref`, `out`, `read`
 - Function definitions: `fn` and `def`
 - Struct and trait definitions
@@ -32,7 +32,8 @@ A modern [Zed](https://zed.dev) editor extension providing comprehensive support
 
 ### Prerequisites
 - **Zed Editor** (latest version)
-- **Magic CLI** for LSP functionality (`magic` command available)
+- **Mojo** (v0.25.6+) - Install via `pip install mojo`, Pixi, or Magic CLI
+- **Magic CLI** for LSP functionality (recommended)
 
 ### Install Extension
 
@@ -129,13 +130,36 @@ The extension integrates with the official Mojo LSP server via the Magic platfor
 - **Navigation**: Go to definition, find references, symbol outline
 - **Formatting**: Code formatting and style suggestions
 
-### Setup Magic CLI
+### Setup Mojo
+
+You can install Mojo using multiple methods:
+
+#### Option 1: pip (Python package)
 ```bash
-# Install Magic (if not already installed)
+# Install Mojo via pip (v0.25.6+)
+pip install mojo
+
+# Or using uv (faster)
+uv pip install mojo
+```
+
+#### Option 2: Pixi (Recommended for projects)
+```bash
+# Add to pixi.toml
+pixi add mojo
+
+# Or install globally
+pixi global install mojo
+```
+
+#### Option 3: Magic CLI (Full platform)
+```bash
+# Install Magic (includes Mojo + MAX)
 curl -ssL https://magic.modular.com/install | bash
 
 # Verify installation
 magic --version
+mojo --version
 ```
 
 ## Grammar Development
@@ -184,10 +208,11 @@ zed-mojo/
 
 ## Compatibility
 
-- **Mojo Language**: v25.4+ (modern syntax)
+- **Mojo Language**: v0.25.6+ (modern syntax)
 - **Zed Editor**: Latest stable version
 - **Platforms**: macOS, Linux, Windows
-- **Magic CLI**: Compatible with Mojo LSP server
+- **Installation**: pip, Pixi, or Magic CLI
+- **LSP**: Mojo LSP server via Magic platform
 
 ## Troubleshooting
 
