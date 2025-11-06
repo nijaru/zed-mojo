@@ -8,7 +8,7 @@ repository = "https://github.com/nijaru/zed-mojo"
 
 [grammars.mojo]
 repository = "https://github.com/nijaru/zed-mojo"
-commit = "4972ff1"
+commit = "6ddda44"
 
 [language_servers.mojo-lsp]
 name = "mojo-lsp"

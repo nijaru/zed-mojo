@@ -94,10 +94,10 @@ cp -r . ~/.config/zed/extensions/mojo/
 - **Basic expressions**: Identifiers, literals, function calls
 
 ### LSP Integration
-- **Magic platform integration** - Uses `magic run mojo-lsp-server`
-- **Automatic binary management** - Downloads/manages Magic CLI
+- **Direct LSP server** - Uses `mojo-lsp-server` command directly
+- **Automatic path detection** - Searches common installation locations
 - **Standard LSP features** - Diagnostics, completion, navigation
-- **Error handling** - Graceful fallback when Magic not available
+- **Multiple install methods** - Supports pip, Pixi, and Modular CLI installations
 
 ## File Structure and Purposes
 
@@ -200,10 +200,14 @@ var tmp = value^
 - Simplify complex rules that cause conflicts
 
 ### LSP Not Working
-- Verify Magic CLI is installed (`magic --version`)
-- Check LSP server path in extension configuration
-- Ensure Rust extension builds without errors
-- Test LSP command manually: `magic run mojo-lsp-server`
+- Verify `mojo-lsp-server` is installed: `mojo-lsp-server --help`
+- Check installation path: `which mojo-lsp-server`
+- Ensure Mojo is installed via pip/Pixi/Modular CLI
+- Check common paths:
+  - `~/.modular/pkg/packages.modular.com_mojo/bin/mojo-lsp-server`
+  - `~/.local/lib/python3.X/site-packages/max/bin/mojo-lsp-server`
+- Ensure Rust extension builds without errors: `cargo build --release`
+- Test LSP directly: `mojo-lsp-server --help`
 
 ### Syntax Highlighting Issues  
 - Update `queries/highlights.scm` after grammar changes

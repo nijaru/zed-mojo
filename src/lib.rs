@@ -1,94 +1,63 @@
 use zed_extension_api::{self as zed, Result};
+use std::fs;
 
-struct MojoExtension {
-    cached_binary_path: Option<String>,
-}
+struct MojoExtension;
 
 impl MojoExtension {
-    fn language_server_binary_path(&mut self, language_server_id: &zed::LanguageServerId) -> Result<String> {
-        if let Some(path) = &self.cached_binary_path {
-            if let Ok(stat) = std::fs::metadata(path) {
-                if stat.is_file() {
-                    return Ok(path.clone());
-                }
+    fn language_server_binary_path(
+        &mut self,
+        language_server_id: &zed::LanguageServerId,
+        worktree: &zed::Worktree,
+    ) -> Result<String> {
+        // Try to find mojo-lsp-server in various locations
+
+        // 1. First, try using 'mojo-lsp-server' from PATH (simplest)
+        // This works if user installed via pip or has .modular/bin in PATH
+        let binary_name = "mojo-lsp-server";
+
+        // 2. Check common installation locations if PATH lookup fails
+        let possible_paths = vec![
+            // Modular CLI installation
+            format!("{}/.modular/pkg/packages.modular.com_mojo/bin/mojo-lsp-server",
+                    std::env::var("HOME").unwrap_or_default()),
+            // pip install in user site-packages (common with uv/pip)
+            format!("{}/.local/lib/python3.13/site-packages/max/bin/mojo-lsp-server",
+                    std::env::var("HOME").unwrap_or_default()),
+            format!("{}/.local/lib/python3.12/site-packages/max/bin/mojo-lsp-server",
+                    std::env::var("HOME").unwrap_or_default()),
+            format!("{}/.local/lib/python3.11/site-packages/max/bin/mojo-lsp-server",
+                    std::env::var("HOME").unwrap_or_default()),
+        ];
+
+        // Check if mojo-lsp-server exists in any of the known paths
+        for path in &possible_paths {
+            if fs::metadata(path).map_or(false, |m| m.is_file()) {
+                return Ok(path.clone());
             }
         }
 
-        zed::set_language_server_installation_status(
-            language_server_id,
-            &zed::LanguageServerInstallationStatus::CheckingForUpdate,
-        );
-
-        let release = zed::latest_github_release(
-            "modular/mojo",
-            zed::GithubReleaseOptions {
-                require_assets: true,
-                pre_release: false,
-            },
-        )?;
-
-        let (platform, arch) = zed::current_platform();
-        let asset_name = format!(
-            "magic-{:?}-{:?}.{}",
-            arch,
-            platform,
-            if matches!(platform, zed::Os::Windows) { "exe" } else { "tar.gz" }
-        );
-
-        let asset = release
-            .assets
-            .iter()
-            .find(|asset| asset.name == asset_name)
-            .ok_or_else(|| format!("no asset found matching '{}'", asset_name))?;
-
-        let version_dir = format!("magic-{}", release.version);
-        let binary_path = format!("{version_dir}/magic");
-
-        if !std::fs::metadata(&binary_path).map_or(false, |stat| stat.is_file()) {
-            zed::set_language_server_installation_status(
-                language_server_id,
-                &zed::LanguageServerInstallationStatus::Downloading,
-            );
-
-            zed::download_file(
-                &asset.download_url,
-                &version_dir,
-                zed::DownloadedFileType::GzipTar,
-            )
-            .map_err(|e| format!("failed to download file: {e}"))?;
-
-            let entries =
-                std::fs::read_dir(".").map_err(|e| format!("failed to list working directory {e}"))?;
-            for entry in entries {
-                let entry = entry.map_err(|e| format!("failed to load directory entry {e}"))?;
-                if entry.file_name().to_str() != Some(&version_dir) {
-                    std::fs::remove_dir_all(&entry.path()).ok();
-                }
-            }
-        }
-
-        self.cached_binary_path = Some(binary_path.clone());
-        Ok(binary_path)
+        // If we can't find it in known locations, just return the binary name
+        // and let the system PATH resolve it. If it's not found, Zed will
+        // show an error message to the user.
+        Ok(binary_name.to_string())
     }
 }
 
 impl zed::Extension for MojoExtension {
     fn new() -> Self {
-        Self {
-            cached_binary_path: None,
-        }
+        Self
     }
 
     fn language_server_command(
         &mut self,
         language_server_id: &zed::LanguageServerId,
-        _worktree: &zed::Worktree,
+        worktree: &zed::Worktree,
     ) -> Result<zed::Command> {
-        let magic_path = self.language_server_binary_path(language_server_id)?;
-        
+        let binary_path = self.language_server_binary_path(language_server_id, worktree)?;
+
         Ok(zed::Command {
-            command: magic_path,
-            args: vec!["run".to_string(), "mojo-lsp-server".to_string()],
+            command: binary_path,
+            args: vec![],
             env: Default::default(),
         })
     }
