@@ -1,171 +1,124 @@
-# CLAUDE.md
+# Development Guide
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Technical documentation for working on this Zed extension for Mojo.
 
-## Project Overview
+## Architecture
 
-This is a comprehensive **Zed editor extension for the Mojo programming language** that includes:
-- **Tree-sitter grammar** for syntax parsing and highlighting
-- **Rust-based LSP integration** with the Magic platform
-- **Language configuration** for Zed editor integration
-- **Modern Mojo v0.25.6+ syntax support** exclusively
+### Components
 
-The project follows the **single repository approach** - all components (extension + grammar) are in one repo for simplified development. The grammar can be extracted to a separate repo later if needed.
+- **Tree-sitter grammar** (`grammar.js`, `src/scanner.c`) - Syntax parsing
+- **Rust extension** (`src/lib.rs`) - LSP integration via Zed extension API
+- **Language config** (`languages/mojo/`) - Zed-specific configuration
+- **Syntax queries** (`queries/`) - Highlighting, indentation, navigation
 
-## Development Commands
+### LSP Approach
 
-### Grammar Development
+The extension detects existing `mojo-lsp-server` installations rather than auto-installing.
+
+**Rationale:**
+- Zed extensions run in WASM (no shell command execution)
+- Mojo distributed via Conda/pip (not standalone binaries)
+- Respects user's environment management preferences
+
+**Search paths (in order):**
+1. `~/.pixi/bin/mojo-lsp-server` (Pixi global)
+2. `~/.local/lib/python3.X/site-packages/max/bin/mojo-lsp-server` (pip/uv)
+3. `~/.modular/pkg/packages.modular.com_mojo/bin/mojo-lsp-server` (legacy)
+4. System PATH
+
+## Building
+
+### Grammar
+
 ```bash
-# Generate parser from grammar.js
-tree-sitter generate
-
-# Test grammar parsing
-tree-sitter parse test.mojo
-tree-sitter parse simple.mojo
-
-# Run grammar tests (when test files exist)
-tree-sitter test
-
-# Build for web (debugging)
-tree-sitter build --wasm
-tree-sitter playground
+tree-sitter generate              # Generate parser from grammar.js
+tree-sitter parse test.mojo       # Test parsing
+tree-sitter test                  # Run grammar tests
 ```
 
-### Extension Building
+### Extension
+
 ```bash
-# Install Node.js dependencies and build native bindings
-npm install
+npm install                       # Install Node.js dependencies
+cargo build --release             # Build Rust extension
+```
 
-# Build Rust extension for Zed
-cargo build --release
+### Complete Build
 
-# Complete build process (both grammar and extension)
+```bash
 tree-sitter generate && npm install && cargo build --release
 ```
 
-### Mojo Installation (REQUIRED for users)
-```bash
-# Recommended: Install via Pixi (Modular's official recommendation as of May 2025)
-pixi global install mojo
+## Testing
 
-# Alternative: Install via uv or pip
-uv pip install mojo
-# or
-pip install mojo
+### Install in Zed
 
-# Verify installation
-mojo --version
-mojo-lsp-server --help
+1. Open Zed
+2. Cmd/Ctrl+Shift+P → "Install Dev Extension"
+3. Select this directory
+
+### Verify
+
+- Open a `.mojo` file
+- Check syntax highlighting
+- Verify LSP features (hover, completion, diagnostics)
+
+## Grammar Development
+
+### Target Syntax
+
+- Mojo v0.25.6+ exclusively (no legacy support)
+- Core features: `fn`/`def`, argument conventions (`mut`, `owned`, `ref`, `out`, `read`)
+- Structs, traits, basic generics
+- Simplified approach: working simple rules > broken complex rules
+
+### Workflow
+
+1. Edit `grammar.js`
+2. Run `tree-sitter generate`
+3. Test with `tree-sitter parse examples.mojo`
+4. Update `queries/highlights.scm` if needed
+5. Test in Zed
+
+### Common Issues
+
+- **Conflicts**: Use `conflicts` section or increase precedence
+- **External tokens**: Ensure `externals` match `src/scanner.c`
+- **Test files**: Use examples from `external/modular/examples/mojo/`
+
+## File Structure
+
 ```
-
-**IMPORTANT**: The extension does NOT auto-install Mojo because:
-1. Zed extensions run in WebAssembly (WASM) and cannot execute shell commands
-2. Mojo is distributed via Conda/pip packages, not standalone binaries
-3. Users should manage their Python/Mojo environment with their preferred tool
-4. This prevents polluting user's global Python environment
-
-### Testing in Zed
-```bash
-# Install as development extension in Zed
-# 1. Open Zed editor
-# 2. Cmd+Shift+P → "Install Dev Extension"  
-# 3. Select this directory
-
-# Or copy to extensions directory
-cp -r . ~/.config/zed/extensions/mojo/
+.
+├── grammar.js                  # Tree-sitter grammar definition
+├── src/
+│   ├── lib.rs                  # Rust extension (LSP integration)
+│   ├── scanner.c               # External scanner (indentation)
+│   └── parser.c                # Generated parser (don't edit)
+├── queries/
+│   ├── highlights.scm          # Syntax highlighting
+│   ├── indents.scm             # Indentation rules
+│   └── tags.scm                # Symbol navigation
+├── languages/mojo/
+│   ├── config.toml             # Zed language configuration
+│   └── brackets.scm            # Bracket matching
+├── extension.toml              # Extension metadata
+├── package.json                # Node.js config for tree-sitter
+└── external/modular/           # Official Mojo reference (submodule)
 ```
-
-## Architecture Understanding
-
-### Component Relationship
-1. **`grammar.js`** → Defines Mojo syntax rules for tree-sitter
-2. **`src/scanner.c`** → External scanner for complex tokens (indentation)
-3. **`queries/`** → Syntax highlighting and navigation rules  
-4. **`languages/mojo/`** → Zed language configuration
-5. **`src/lib.rs`** → Rust extension for LSP integration with Magic platform
-6. **`extension.toml`** → Zed extension metadata and configuration
-
-### Grammar Strategy
-- **Clean Mojo-first approach** - Not based on Python grammar
-- **Simplified implementation** - Focus on core features that work reliably
-- **Modern syntax target** - Mojo v0.25.6+ exclusively, no legacy support
-- **Conflict management** - Minimal conflicts for better parser performance
-
-### Key Mojo Language Features Implemented
-- **Function definitions**: `fn` and `def` with parameter lists
-- **Argument conventions**: `mut`, `owned`, `ref`, `out`, `read` 
-- **Struct and trait definitions**: Basic structure without complex generics
-- **Variable declarations**: `var` with optional type annotations
-- **Import statements**: Basic `import` syntax
-- **Basic expressions**: Identifiers, literals, function calls
-
-### LSP Integration
-- **Path detection only** - Finds existing `mojo-lsp-server` installations
-- **No auto-install** - Users must install Mojo manually (WASM limitation)
-- **Multiple install methods** - Supports Pixi (recommended), pip/uv, legacy Modular CLI
-- **Search priority**:
-  1. `~/.pixi/bin/mojo-lsp-server` (Pixi global)
-  2. `~/.local/lib/python3.X/site-packages/max/bin/mojo-lsp-server` (pip/uv)
-  3. `~/.modular/pkg/.../mojo-lsp-server` (legacy Modular CLI)
-  4. System `PATH` (fallback)
-- **Standard LSP features** - Diagnostics, completion, navigation
-
-## File Structure and Purposes
-
-### Core Grammar Files
-- **`grammar.js`** - Main tree-sitter grammar definition
-- **`src/scanner.c`** - External scanner for indentation handling
-- **`src/parser.c`** - Generated parser (auto-generated, don't edit)
-- **`tree-sitter.json`** - Tree-sitter configuration metadata
-
-### Zed Integration Files  
-- **`extension.toml`** - Extension metadata and grammar reference
-- **`languages/mojo/config.toml`** - Language-specific Zed configuration
-- **`languages/mojo/brackets.scm`** - Bracket matching rules
-- **`Cargo.toml` + `src/lib.rs`** - Rust extension for LSP integration
-
-### Syntax Support Files
-- **`queries/highlights.scm`** - Syntax highlighting rules
-- **`queries/indents.scm`** - Indentation behavior
-- **`queries/tags.scm`** - Symbol navigation and outline
-
-### Build and Package Files
-- **`package.json`** - Node.js package config for tree-sitter
-- **`binding.gyp`** - Native addon build configuration  
-- **`bindings/node/`** - Node.js bindings for grammar
-
-## Grammar Development Workflow
-
-### Making Grammar Changes
-1. **Edit `grammar.js`** with new syntax rules
-2. **Run `tree-sitter generate`** to rebuild parser
-3. **Test with `tree-sitter parse file.mojo`**
-4. **Update syntax highlighting** in `queries/highlights.scm` if needed
-5. **Test in Zed** by installing dev extension
-
-### Common Grammar Issues
-- **Conflicts** - Use `conflicts` section to resolve ambiguities
-- **Precedence** - Set appropriate `PREC` values for operators
-- **External tokens** - Use `externals` for complex tokenization  
-- **Simplification** - Prefer working simple rules over complex broken ones
-
-### Testing Strategy
-- **Core syntax first** - Ensure basic `fn`, `struct`, `var` work
-- **Real examples** - Test against actual Mojo code from `external/modular/`
-- **Edge cases** - Complex type annotations, generics can be refined later
-- **Error tolerance** - Parser should handle partial/invalid syntax gracefully
 
 ## Reference Materials
 
-### Official Mojo Resources
-- **`external/modular/`** - Official Mojo platform (git submodule)
-  - Modern syntax examples in `external/modular/examples/mojo/`
-  - Standard library patterns in `external/modular/mojo/stdlib/`
-  - Documentation in `external/modular/mojo/docs/`
+### Official Mojo Sources
 
-### Key Modern Mojo Patterns (v0.25.6+)
+- `external/modular/examples/mojo/` - Modern syntax examples
+- `external/modular/mojo/stdlib/` - Standard library
+- `external/modular/mojo/docs/` - Documentation and changelog
+
+### Modern Mojo v0.25.6 Patterns
+
 ```mojo
-# Modern argument conventions
+# Argument conventions
 fn process(mut self, out result: Int, owned data: String, ref config: Config):
     pass
 
@@ -173,57 +126,51 @@ fn process(mut self, out result: Int, owned data: String, ref config: Config):
 struct Point:
     var x: Int
     var y: Int
-    
+
     fn __init__(out self, x: Int, y: Int):
         self.x = x
         self.y = y
 
-# Transfer ownership  
+# Transfer ownership
 var tmp = value^
 ```
 
-## Development Guidelines
-
-### Grammar Philosophy
-- **Start simple** - Get basic features working before adding complexity
-- **Mojo-first** - Design for Mojo syntax, not Python compatibility
-- **Modern focus** - Target v0.25.6+ syntax exclusively
-- **Pragmatic approach** - Working simple grammar > broken complex grammar
-
-### Code Quality
-- **No breaking changes** - Ensure `tree-sitter generate` always succeeds
-- **Test real code** - Use examples from `external/modular/` for testing
-- **Document limitations** - Be clear about what syntax is/isn't supported
-- **Incremental improvement** - Build working foundation, then enhance
-
-### Zed Integration
-- **Follow Zed conventions** - Use standard extension patterns
-- **LSP best practices** - Proper error handling and status reporting
-- **Performance considerations** - Grammar should parse efficiently
-- **User experience** - Extension should "just work" for basic Mojo files
-
-## Troubleshooting Common Issues
+## Troubleshooting
 
 ### Grammar Generation Fails
+
 - Check for undefined rules or circular references
-- Verify `conflicts` section resolves ambiguities  
-- Ensure `externals` match scanner implementation
-- Simplify complex rules that cause conflicts
+- Verify `conflicts` section
+- Ensure `externals` match scanner
+- Simplify complex rules
 
 ### LSP Not Working
-- Verify `mojo-lsp-server` is installed: `mojo-lsp-server --help`
-- Check installation path: `which mojo-lsp-server`
-- Ensure Mojo is installed via pip/Pixi/Modular CLI
-- Check common paths:
-  - `~/.modular/pkg/packages.modular.com_mojo/bin/mojo-lsp-server`
-  - `~/.local/lib/python3.X/site-packages/max/bin/mojo-lsp-server`
-- Ensure Rust extension builds without errors: `cargo build --release`
-- Test LSP directly: `mojo-lsp-server --help`
 
-### Syntax Highlighting Issues  
+- Verify `mojo-lsp-server` exists: `which mojo-lsp-server`
+- Check paths in `src/lib.rs`
+- Test LSP manually: `mojo-lsp-server --help`
+- Check Zed logs for errors
+
+### Syntax Highlighting Issues
+
 - Update `queries/highlights.scm` after grammar changes
 - Verify query syntax matches grammar rule names
-- Test highlighting with different Mojo code patterns
 - Check Zed console for query parsing errors
 
-This documentation helps maintain the project's technical direction and development practices.
+## Git Workflow
+
+### Submodule Management
+
+```bash
+# Update to latest Modular sources
+git submodule update --remote external/modular
+
+# Check current version
+cd external/modular && git log -1 --oneline
+```
+
+### Commit Guidelines
+
+- Grammar changes: Update grammar commit hash in `extension.toml`
+- Test before committing: `tree-sitter generate` must succeed
+- Use examples from `external/modular/` for testing
