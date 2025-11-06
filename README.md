@@ -31,8 +31,14 @@ A modern [Zed](https://zed.dev) editor extension providing comprehensive support
 ## Installation
 
 ### Prerequisites
+
+**IMPORTANT**: This extension does **NOT** auto-install Mojo. You must install Mojo first using one of the methods below.
+
 - **Zed Editor** (latest version)
-- **Mojo** (v0.25.6+) with LSP server - Install via `pip install mojo`, Pixi, or Modular CLI
+- **Mojo v0.25.6+** with `mojo-lsp-server` - Choose one installation method:
+  - **Recommended**: `pixi global install mojo` (isolated, modern)
+  - **Alternative**: `uv pip install mojo` or `pip install mojo`
+  - **Legacy**: Modular CLI (deprecated)
 
 ### Install Extension
 
@@ -129,50 +135,76 @@ The extension integrates with the official Mojo LSP server via the Magic platfor
 - **Navigation**: Go to definition, find references, symbol outline
 - **Formatting**: Code formatting and style suggestions
 
-### Setup Mojo LSP Server
+## Setup: Install Mojo First
 
-The extension requires `mojo-lsp-server` to be installed and accessible. Choose one of these installation methods:
+**The extension requires Mojo to be installed on your system.** Choose the installation method that best fits your workflow:
 
-#### Option 1: pip (Python package) - Recommended
+### Option 1: Pixi (Recommended) ⭐
+
+Pixi is the officially recommended tool by Modular (as of May 2025). It provides isolated environments without polluting your global Python installation.
+
 ```bash
-# Install Mojo via pip (v0.25.6+)
-pip install mojo
+# Install Pixi
+curl -fsSL https://pixi.sh/install.sh | bash
 
-# The LSP server is included at:
-# ~/.local/lib/python3.X/site-packages/max/bin/mojo-lsp-server
-
-# Add to PATH (optional, extension auto-detects common locations)
-export PATH="$HOME/.local/lib/python3.13/site-packages/max/bin:$PATH"
-
-# Verify installation
-mojo-lsp-server --help
-```
-
-#### Option 2: Pixi (Recommended for projects)
-```bash
-# Add to pixi.toml
-pixi add mojo
-
-# Or install globally
+# Install Mojo globally
 pixi global install mojo
-
-# LSP server will be available in Pixi environment
-```
-
-#### Option 3: Modular CLI (Full platform)
-```bash
-# Install Modular (includes Mojo + MAX + LSP)
-# Visit: https://developer.modular.com
-
-# LSP server location:
-# ~/.modular/pkg/packages.modular.com_mojo/bin/mojo-lsp-server
 
 # Verify installation
 mojo --version
 mojo-lsp-server --help
 ```
 
-**Note**: The extension automatically searches common installation locations. If `mojo-lsp-server` is not in your PATH, ensure it's installed via one of the methods above.
+**Why Pixi?**
+- ✅ Isolated environments (doesn't pollute global pip)
+- ✅ Official Modular recommendation
+- ✅ Automatically installs `mojo-lsp-server`
+- ✅ Extension auto-detects at `~/.pixi/bin/mojo-lsp-server`
+
+### Option 2: uv/pip (Python package)
+
+If you prefer Python package managers:
+
+```bash
+# Using uv (faster, recommended for Python projects)
+uv pip install mojo
+
+# Or using pip
+pip install mojo
+
+# The LSP server will be at:
+# ~/.local/lib/python3.X/site-packages/max/bin/mojo-lsp-server
+
+# Optionally add to PATH:
+export PATH="$HOME/.local/lib/python3.13/site-packages/max/bin:$PATH"
+
+# Verify installation
+mojo-lsp-server --help
+```
+
+### Option 3: Legacy Modular CLI (Deprecated)
+
+**Not recommended** - Modular CLI is deprecated. Use Pixi instead.
+
+---
+
+### Verification
+
+After installation, verify `mojo-lsp-server` is accessible:
+
+```bash
+# Check if mojo-lsp-server is found
+which mojo-lsp-server
+
+# Or try running it
+mojo-lsp-server --help
+```
+
+The extension automatically searches these locations:
+1. `~/.pixi/bin/mojo-lsp-server` (Pixi global)
+2. `~/.local/lib/python3.X/site-packages/max/bin/mojo-lsp-server` (pip/uv)
+3. `~/.modular/pkg/packages.modular.com_mojo/bin/mojo-lsp-server` (legacy)
+4. System `PATH`
 
 ## Grammar Development
 
@@ -231,11 +263,23 @@ zed-mojo/
 ### Common Issues
 
 **LSP not working?**
-- Ensure `mojo-lsp-server` is installed (run `mojo-lsp-server --help` to verify)
-- Check that Mojo is installed via pip, Pixi, or Modular CLI
-- Add LSP server to PATH: `export PATH="$HOME/.local/lib/python3.13/site-packages/max/bin:$PATH"`
-- Restart Zed after installing Mojo/extension
-- Check Zed logs for LSP connection errors
+- **First**: Verify Mojo is installed: `mojo-lsp-server --help`
+- **Check installation**: `which mojo-lsp-server` to see the path
+- **Install Mojo** if not found: `pixi global install mojo` (recommended)
+- **Restart Zed** after installing Mojo
+- **Check Zed logs** (Cmd/Ctrl+Shift+P → "Zed: Open Log") for LSP errors
+- **Manual override**: Set custom path in Zed settings:
+  ```json
+  {
+    "lsp": {
+      "mojo-lsp": {
+        "binary": {
+          "path": "/path/to/mojo-lsp-server"
+        }
+      }
+    }
+  }
+  ```
 
 **Syntax highlighting missing?**
 - Verify the extension is properly installed

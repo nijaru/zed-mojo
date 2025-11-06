@@ -43,20 +43,26 @@ cargo build --release
 tree-sitter generate && npm install && cargo build --release
 ```
 
-### Mojo Installation (for testing)
+### Mojo Installation (REQUIRED for users)
 ```bash
-# Option 1: Install via pip
+# Recommended: Install via Pixi (Modular's official recommendation as of May 2025)
+pixi global install mojo
+
+# Alternative: Install via uv or pip
+uv pip install mojo
+# or
 pip install mojo
-
-# Option 2: Install via Pixi (recommended for development)
-pixi add mojo
-
-# Option 3: Install via Magic CLI (full platform)
-curl -ssL https://magic.modular.com/install | bash
 
 # Verify installation
 mojo --version
+mojo-lsp-server --help
 ```
+
+**IMPORTANT**: The extension does NOT auto-install Mojo because:
+1. Zed extensions run in WebAssembly (WASM) and cannot execute shell commands
+2. Mojo is distributed via Conda/pip packages, not standalone binaries
+3. Users should manage their Python/Mojo environment with their preferred tool
+4. This prevents polluting user's global Python environment
 
 ### Testing in Zed
 ```bash
@@ -94,10 +100,15 @@ cp -r . ~/.config/zed/extensions/mojo/
 - **Basic expressions**: Identifiers, literals, function calls
 
 ### LSP Integration
-- **Direct LSP server** - Uses `mojo-lsp-server` command directly
-- **Automatic path detection** - Searches common installation locations
+- **Path detection only** - Finds existing `mojo-lsp-server` installations
+- **No auto-install** - Users must install Mojo manually (WASM limitation)
+- **Multiple install methods** - Supports Pixi (recommended), pip/uv, legacy Modular CLI
+- **Search priority**:
+  1. `~/.pixi/bin/mojo-lsp-server` (Pixi global)
+  2. `~/.local/lib/python3.X/site-packages/max/bin/mojo-lsp-server` (pip/uv)
+  3. `~/.modular/pkg/.../mojo-lsp-server` (legacy Modular CLI)
+  4. System `PATH` (fallback)
 - **Standard LSP features** - Diagnostics, completion, navigation
-- **Multiple install methods** - Supports pip, Pixi, and Modular CLI installations
 
 ## File Structure and Purposes
 
