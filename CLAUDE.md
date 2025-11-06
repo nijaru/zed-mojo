@@ -7,9 +7,25 @@ Technical documentation for working on this Zed extension for Mojo.
 ### Components
 
 - **Tree-sitter grammar** (`grammar.js`, `src/scanner.c`) - Syntax parsing
+- **Generated parser** (`src/parser.c`) - Must be committed to repo
 - **Rust extension** (`src/lib.rs`) - LSP integration via Zed extension API
 - **Language config** (`languages/mojo/`) - Zed-specific configuration
 - **Syntax queries** (`queries/`) - Highlighting, indentation, navigation
+
+### How Zed Loads the Grammar
+
+**Important:** Zed does NOT run `tree-sitter generate`. Instead:
+
+1. Zed reads `extension.toml` → finds grammar at specific commit
+2. Zed clones the repository at that commit
+3. Zed compiles the committed `src/parser.c` to WebAssembly
+4. Grammar works in Zed!
+
+**This means:**
+- ✅ `src/parser.c` MUST be committed to the repository
+- ✅ After editing `grammar.js`, you must run `tree-sitter generate`
+- ✅ Commit both `grammar.js` and `src/parser.c` together
+- ✅ Update commit hash in `extension.toml` after grammar changes
 
 ### LSP Approach
 
@@ -82,10 +98,14 @@ tree-sitter test                  # Run grammar tests
 ### Workflow
 
 1. Edit `grammar.js`
-2. Run `tree-sitter generate`
-3. Test with `tree-sitter parse examples.mojo`
+2. Run `tree-sitter generate` (regenerates `src/parser.c`)
+3. Test with `tree-sitter parse test.mojo`
 4. Update `queries/highlights.scm` if needed
-5. Test in Zed
+5. **Commit both `grammar.js` and `src/parser.c`**
+6. Update commit hash in `extension.toml` to match new commit
+7. Test in Zed with "Install Dev Extension"
+
+**Critical:** Always commit `src/parser.c` after running `tree-sitter generate`. Zed needs the compiled parser, not just the grammar source.
 
 ### Common Issues
 

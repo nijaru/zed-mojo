@@ -75,9 +75,16 @@ To override the default search, configure the LSP binary path in your Zed settin
 ### Building
 
 ```bash
-tree-sitter generate       # Generate parser from grammar.js
+tree-sitter generate       # Generate parser from grammar.js → src/parser.c
 cargo build --release      # Build Rust extension
 ```
+
+**Important:** After editing `grammar.js`, always:
+1. Run `tree-sitter generate` to regenerate `src/parser.c`
+2. Commit both `grammar.js` and `src/parser.c`
+3. Update the commit hash in `extension.toml`
+
+Zed compiles the committed `src/parser.c` (not `grammar.js`) to WebAssembly.
 
 ### Testing
 
