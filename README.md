@@ -17,11 +17,7 @@ The extension searches for `mojo-lsp-server` in standard installation locations 
 
 ## Installation
 
-### From Zed Extensions
-
-Search for "Mojo" in the Zed extensions panel and click Install.
-
-### Development Installation
+Clone and install as a development extension:
 
 ```bash
 git clone --recursive https://github.com/nijaru/zed-mojo.git
@@ -29,7 +25,7 @@ cd zed-mojo
 npm install && cargo build --release
 ```
 
-Then use "Install Dev Extension" in Zed (Cmd/Ctrl+Shift+P).
+Then in Zed: Cmd/Ctrl+Shift+P → "Install Dev Extension" → select this directory
 
 ## Configuration
 
