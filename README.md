@@ -11,28 +11,9 @@ Language support for [Mojo](https://docs.modular.com/mojo) in the Zed editor.
 
 ## Requirements
 
-This extension requires `mojo-lsp-server` to be installed on your system. The extension will search for it in common locations but does not install it automatically.
+- [Mojo](https://docs.modular.com/mojo/manual/get-started/) installed with `mojo-lsp-server`
 
-### Installing Mojo
-
-Choose one of the following installation methods:
-
-**Pixi (Recommended):**
-```bash
-pixi global install mojo
-```
-
-**uv or pip:**
-```bash
-uv pip install mojo
-# or
-pip install mojo
-```
-
-Verify installation:
-```bash
-mojo-lsp-server --help
-```
+The extension searches for `mojo-lsp-server` in standard installation locations and your PATH.
 
 ## Installation
 
@@ -75,8 +56,9 @@ To override the default search, configure the LSP binary path in your Zed settin
 ## Troubleshooting
 
 **LSP server not found:**
-- Verify Mojo is installed: `which mojo-lsp-server`
-- Restart Zed after installing Mojo
+- Verify installation: `which mojo-lsp-server`
+- Restart Zed if you just installed Mojo
+- Configure custom path in settings (see Configuration section above)
 - Check Zed logs: Cmd/Ctrl+Shift+P → "Zed: Open Log"
 
 **Syntax highlighting issues:**
