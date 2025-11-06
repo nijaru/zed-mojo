@@ -28,25 +28,32 @@ The extension detects existing `mojo-lsp-server` installations rather than auto-
 
 ## Building
 
-### Grammar
+### Prerequisites
+
+Install tree-sitter CLI (one-time):
+
+```bash
+cargo install tree-sitter-cli
+```
+
+### Build Commands
 
 ```bash
 tree-sitter generate              # Generate parser from grammar.js
-tree-sitter parse test.mojo       # Test parsing
-tree-sitter test                  # Run grammar tests
-```
-
-### Extension
-
-```bash
-npm install                       # Install Node.js dependencies
 cargo build --release             # Build Rust extension
 ```
 
 ### Complete Build
 
 ```bash
-tree-sitter generate && npm install && cargo build --release
+tree-sitter generate && cargo build --release
+```
+
+### Testing Grammar
+
+```bash
+tree-sitter parse test.mojo       # Test parsing
+tree-sitter test                  # Run grammar tests
 ```
 
 ## Testing
@@ -103,7 +110,6 @@ tree-sitter generate && npm install && cargo build --release
 │   ├── config.toml             # Zed language configuration
 │   └── brackets.scm            # Bracket matching
 ├── extension.toml              # Extension metadata
-├── package.json                # Node.js config for tree-sitter
 └── external/modular/           # Official Mojo reference (submodule)
 ```
 

@@ -17,12 +17,21 @@ The extension searches for `mojo-lsp-server` in standard installation locations 
 
 ## Installation
 
-Clone and install as a development extension:
+### Prerequisites
+
+Install tree-sitter CLI (one-time setup):
+
+```bash
+cargo install tree-sitter-cli
+```
+
+### Install Extension
 
 ```bash
 git clone --recursive https://github.com/nijaru/zed-mojo.git
 cd zed-mojo
-npm install && cargo build --release
+tree-sitter generate
+cargo build --release
 ```
 
 Then in Zed: Cmd/Ctrl+Shift+P → "Install Dev Extension" → select this directory
@@ -63,24 +72,24 @@ To override the default search, configure the LSP binary path in your Zed settin
 
 ## Development
 
-### Building the Grammar
+### Building
 
 ```bash
-tree-sitter generate
-tree-sitter parse test.mojo
-```
-
-### Building the Extension
-
-```bash
-cargo build --release
+tree-sitter generate       # Generate parser from grammar.js
+cargo build --release      # Build Rust extension
 ```
 
 ### Testing
 
-Open a `.mojo` file in Zed and verify:
-- Syntax highlighting appears
-- LSP features work (hover, completion, diagnostics)
+```bash
+tree-sitter parse test.mojo   # Test grammar parsing
+tree-sitter test              # Run grammar tests
+```
+
+Then in Zed:
+- Open a `.mojo` file
+- Verify syntax highlighting
+- Test LSP features (hover, completion, diagnostics)
 
 ## License
 
