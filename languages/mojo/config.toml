@@ -7,17 +7,13 @@ scope = "source.mojo"
 [comments]
 line_comment = "#"
 
-[brackets]
-"(" = ")"
-"[" = "]"
-"{" = "}"
-
-[autoclose]
-"(" = ")"
-"[" = "]"
-"{" = "}"
-"\"" = "\""
-"'" = "'"
+brackets = [
+  { start = "(", end = ")", close = true, newline = false },
+  { start = "[", end = "]", close = true, newline = false },
+  { start = "{", end = "}", close = true, newline = false },
+  { start = "\"", end = "\"", close = true, newline = false },
+  { start = "'", end = "'", close = true, newline = false },
+]
 
 [indent]
 unit = "    "
