@@ -1,223 +1,110 @@
-# Zed Mojo Extension
+# Mojo Extension for Zed
 
-A modern [Zed](https://zed.dev) editor extension providing comprehensive support for the [Mojo](https://docs.modular.com/mojo) programming language (v25.4+).
+Language support for [Mojo](https://docs.modular.com/mojo) in the Zed editor.
 
 ## Features
 
-### 🎨 **Syntax Highlighting**
-- Modern Mojo v25.4+ keywords and syntax
-- Argument conventions: `mut`, `owned`, `ref`, `out`, `read`
-- Function definitions: `fn` and `def`
-- Struct and trait definitions
-- Type annotations and generics
+- Syntax highlighting via tree-sitter grammar
+- Language Server Protocol (LSP) integration with `mojo-lsp-server`
+- Support for `.mojo` and `.🔥` file extensions
+- Modern Mojo v0.25.6+ syntax support
 
-### 🔧 **Language Server Integration**
-- **LSP Support** via Magic platform (`mojo-lsp-server`)
-- **Auto-completion** for Mojo APIs and standard library
-- **Error diagnostics** and type checking
-- **Code navigation** (go to definition, find references)
+## Requirements
 
-### 📁 **File Support**
-- `.mojo` files
-- `.🔥` files (fire emoji extension)
-- Proper file type recognition and language switching
+- [Mojo](https://docs.modular.com/mojo/manual/get-started/) v0.25.6 or later
 
-### 🌳 **Tree-sitter Grammar**
-- Clean, Mojo-first grammar (not Python-based)
-- Support for modern argument conventions
-- Struct and trait parsing
-- Function parameter parsing with ownership semantics
+The `mojo-lsp-server` is bundled with Mojo installations (v0.25.6+). The extension automatically searches for it in standard installation locations and your PATH.
 
 ## Installation
 
 ### Prerequisites
-- **Zed Editor** (latest version)
-- **Magic CLI** for LSP functionality (`magic` command available)
+
+Install tree-sitter CLI (one-time setup):
+
+```bash
+cargo install tree-sitter-cli
+```
 
 ### Install Extension
 
-#### Option 1: Development Installation
-1. Clone this repository:
-   ```bash
-   git clone --recursive https://github.com/nijaru/zed-mojo.git
-   cd zed-mojo
-   ```
-
-2. Build the extension:
-   ```bash
-   npm install
-   cargo build --release
-   ```
-
-3. Install in Zed:
-   - Open Zed editor
-   - Press `Cmd+Shift+P` (macOS) or `Ctrl+Shift+P` (Linux/Windows)
-   - Type "Install Dev Extension"
-   - Select this directory
-
-#### Option 2: Manual Installation
 ```bash
-# Copy to Zed extensions directory
-cp -r . ~/.config/zed/extensions/mojo/
+git clone --recursive https://github.com/nijaru/zed-mojo.git
+cd zed-mojo
+tree-sitter generate
+cargo build --release
 ```
 
-## Usage
+Then in Zed: Cmd/Ctrl+Shift+P → "Install Dev Extension" → select this directory
 
-### Quick Start
-1. **Create a new Mojo file**: `hello.mojo`
-2. **Write modern Mojo code**:
-   ```mojo
-   fn main():
-       var message = "Hello, Mojo!"
-       print(message)
+## Configuration
 
-   struct Point:
-       var x: Int
-       var y: Int
-       
-       fn __init__(out self, x: Int, y: Int):
-           self.x = x
-           self.y = y
-       
-       fn distance(self, mut other: Point) -> Float64:
-           var dx = self.x - other.x
-           var dy = self.y - other.y
-           return (dx * dx + dy * dy) ** 0.5
-   ```
+The extension automatically searches for `mojo-lsp-server` in:
+1. `~/.pixi/bin/mojo-lsp-server`
+2. `~/.local/lib/python3.X/site-packages/max/bin/mojo-lsp-server`
+3. `~/.modular/pkg/packages.modular.com_mojo/bin/mojo-lsp-server`
+4. System PATH
 
-3. **Enjoy syntax highlighting and LSP features!**
+To override the default search, configure the LSP binary path in your Zed settings:
 
-### Modern Mojo Syntax Supported
-
-#### Argument Conventions
-```mojo
-fn process_data(
-    mut buffer: Buffer,    # Mutable reference
-    owned data: String,    # Takes ownership
-    ref config: Config,    # Immutable reference  
-    out result: Int,       # Output parameter
-    read flags: Flags      # Read-only access
-):
-    pass
+```json
+{
+  "lsp": {
+    "mojo-lsp": {
+      "binary": {
+        "path": "/custom/path/to/mojo-lsp-server"
+      }
+    }
+  }
+}
 ```
-
-#### Struct Definitions
-```mojo
-struct MyStruct[T: Movable]:
-    var data: T
-    
-    fn __init__(out self, owned value: T):
-        self.data = value^  # Transfer ownership
-```
-
-#### Trait Definitions
-```mojo
-trait Drawable:
-    fn draw(self):
-        pass
-        
-    fn area(self) -> Float64:
-        pass
-```
-
-## Language Server Features
-
-The extension integrates with the official Mojo LSP server via the Magic platform:
-
-- **Diagnostics**: Real-time error checking and warnings
-- **Completion**: Smart auto-completion for APIs and symbols
-- **Navigation**: Go to definition, find references, symbol outline
-- **Formatting**: Code formatting and style suggestions
-
-### Setup Magic CLI
-```bash
-# Install Magic (if not already installed)
-curl -ssL https://magic.modular.com/install | bash
-
-# Verify installation
-magic --version
-```
-
-## Grammar Development
-
-This extension uses a **clean, Mojo-first tree-sitter grammar** designed specifically for modern Mojo syntax, rather than adapting Python grammars.
-
-### Key Grammar Features:
-- **Modern argument conventions** as first-class syntax
-- **Ownership transfer operators** (`^`)
-- **Generic type syntax** with constraints
-- **Struct and trait definitions** with proper inheritance
-- **Minimal conflicts** for better parsing performance
-
-## Contributing
-
-### Development Setup
-1. **Clone with submodules**:
-   ```bash
-   git clone --recursive https://github.com/nijaru/zed-mojo.git
-   ```
-
-2. **Install development dependencies**:
-   ```bash
-   npm install                 # Tree-sitter dependencies
-   cargo build --release       # Rust extension
-   ```
-
-3. **Test grammar changes**:
-   ```bash
-   tree-sitter generate       # Regenerate parser
-   tree-sitter test           # Run grammar tests
-   tree-sitter parse file.mojo # Test specific files
-   ```
-
-### Project Structure
-```
-zed-mojo/
-├── extension.toml          # Zed extension configuration
-├── Cargo.toml + src/       # Rust LSP integration
-├── grammar.js              # Tree-sitter grammar
-├── queries/                # Syntax highlighting rules
-├── languages/mojo/         # Language configuration
-├── external/modular/       # Official Mojo reference (submodule)
-└── docs/                   # Documentation
-```
-
-## Compatibility
-
-- **Mojo Language**: v25.4+ (modern syntax)
-- **Zed Editor**: Latest stable version
-- **Platforms**: macOS, Linux, Windows
-- **Magic CLI**: Compatible with Mojo LSP server
 
 ## Troubleshooting
 
-### Common Issues
+**LSP server not found:**
+- Verify installation: `which mojo-lsp-server`
+- Restart Zed if you just installed Mojo
+- Configure custom path in settings (see Configuration section above)
+- Check Zed logs: Cmd/Ctrl+Shift+P → "Zed: Open Log"
 
-**LSP not working?**
-- Ensure `magic` CLI is installed and in PATH
-- Check that `magic run mojo-lsp-server` works
-- Restart Zed after installing the extension
+**Syntax highlighting issues:**
+- Verify file extension is `.mojo` or `.🔥`
+- Reload window: Cmd/Ctrl+Shift+P → "Reload Window"
 
-**Syntax highlighting missing?**
-- Verify the extension is properly installed
-- Check file extension is `.mojo` or `.🔥`
-- Try reloading the Zed window
+## Development
 
-**Grammar parsing errors?**
-- This is expected for some complex syntax (work in progress)
-- Basic Mojo syntax should work correctly
-- Report issues with minimal reproduction cases
+### Building
+
+```bash
+tree-sitter generate       # Generate parser from grammar.js → src/parser.c
+cargo build --release      # Build Rust extension
+```
+
+**Important:** After editing `grammar.js`, always:
+1. Run `tree-sitter generate` to regenerate `src/parser.c`
+2. Commit both `grammar.js` and `src/parser.c`
+3. Update the commit hash in `extension.toml`
+
+Zed compiles the committed `src/parser.c` (not `grammar.js`) to WebAssembly.
+
+### Testing
+
+```bash
+tree-sitter parse test.mojo   # Test grammar parsing
+tree-sitter test              # Run grammar tests
+```
+
+Then in Zed:
+- Open a `.mojo` file
+- Verify syntax highlighting
+- Test LSP features (hover, completion, diagnostics)
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details.
+MIT - See [LICENSE](LICENSE)
 
-## Related Projects
+## Links
 
-- **[Modular Platform](https://github.com/modular/modular)** - Official Mojo implementation
-- **[Tree-sitter](https://tree-sitter.github.io/)** - Parser generator used for syntax highlighting
-- **[Zed](https://zed.dev)** - The collaborative code editor
-
----
-
-**Built with ❤️ for the Mojo community**
+- [Mojo Documentation](https://docs.modular.com/mojo)
+- [Modular Platform](https://github.com/modular/modular)
+- [Tree-sitter](https://tree-sitter.github.io/)
+- [Zed Editor](https://zed.dev)
